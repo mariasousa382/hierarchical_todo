@@ -1,32 +1,62 @@
+/**
+ * Tasks View Page Component
+ * 
+ * Displays all tasks for a specific todo list with hierarchical structure.
+ * This is a protected route (requires authentication).
+ * 
+ * Features:
+ * - View all tasks in a nested tree structure
+ * - Create new top-level tasks
+ * - Add subtasks to any task (unlimited nesting)
+ * - Mark tasks complete/incomplete (cascades to subtasks)
+ * - Collapse/expand task hierarchies
+ * - Edit task content inline
+ * - Delete tasks (cascades to all subtasks)
+ * - Move top-level tasks to other lists
+ * - Navigate back to lists overview
+ */
+
 import React, { useState, useEffect, useCallback } from "react";
 import TaskItem from "../components/TaskItem";
 
 export default function TasksPage({ listId, onBack }) {
+  // State for tasks in hierarchical structure (nested objects)
   const [tasks, setTasks] = useState([]);
+  // State for all lists (needed for the "Move" dropdown)
   const [lists, setLists] = useState([]);
+  // State for new task creation form
   const [newTask, setNewTask] = useState("");
+  // State for displaying the current list's name in the heading
   const [listName, setListName] = useState("");
 
-  // ✅ Load tasks for this list
   const loadTasks = useCallback(async () => {
+    /**
+     * Fetch all tasks for this list from the backend.
+     */
     try {
       const res = await fetch(`/api/lists/${listId}/tasks`, {
         credentials: "include",
       });
       if (res.ok) {
         const data = await res.json();
-        setTasks(data);
+        setTasks(data);  // Already in tree structure from backend
       } else {
-        setTasks([]);
+        setTasks([]);  // Clear tasks if request fails
       }
     } catch (err) {
       console.error("Failed to load tasks:", err);
-      setTasks([]);
+      setTasks([]);  // Clear tasks on network error
     }
-  }, [listId]);
+  }, [listId]);  // Recreate function only when listId changes
 
-  // ✅ Load all lists and find current list name
   const loadLists = useCallback(async () => {
+    /**
+     * Fetch all lists for the current user.
+     * 
+     * Needed for two purposes:
+     * 1. Find and display the current list's name
+     * 2. Populate the "Move" dropdown with other lists
+     */
     try {
       const res = await fetch(`/api/lists`, {
         credentials: "include",
@@ -34,6 +64,8 @@ export default function TasksPage({ listId, onBack }) {
       if (res.ok) {
         const data = await res.json();
         setLists(data);
+        
+        // Find the current list to display its name
         const currentList = data.find((list) => list.id === Number(listId));
         setListName(currentList ? currentList.name : "");
       } else {
@@ -45,36 +77,47 @@ export default function TasksPage({ listId, onBack }) {
       setLists([]);
       setListName("");
     }
-  }, [listId]);
+  }, [listId]);  
 
+  // Load tasks and lists when listId changes
   useEffect(() => {
     loadTasks();
     loadLists();
   }, [listId, loadTasks, loadLists]);
 
-  // ✅ Add new task
   const handleAddTask = async (e) => {
-    e.preventDefault();
-    if (!newTask.trim()) return;
+    /**
+     * Create a new top-level task in this list.
+     * 
+     * Sends POST request without parent_id (defaults to None on backend).
+     * This creates a root-level task that can have subtasks added later.
+     */
+    e.preventDefault();  // Prevent form submission page reload
+    if (!newTask.trim()) return;  // Don't create empty tasks
 
     try {
       const res = await fetch(`/api/lists/${listId}/tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ content: newTask }),
+        body: JSON.stringify({ content: newTask }),  // No parent_id = top-level
       });
       if (res.ok) {
-        await loadTasks();
-        setNewTask("");
+        await loadTasks();  // Refresh to show new task
+        setNewTask("");     // Clear input field
       }
     } catch (err) {
       console.error("Failed to add task:", err);
     }
   };
 
-  // ✅ Add subtask
   const handleAddSubtask = async (parentId, content) => {
+    /**
+     * Create a subtask under a specific parent task.
+     * 
+     * Called from TaskItem when user adds a subtask.
+     * Sends POST request with parent_id to create child task.
+     */
     try {
       const res = await fetch(`/api/lists/${listId}/tasks`, {
         method: "POST",
@@ -83,43 +126,54 @@ export default function TasksPage({ listId, onBack }) {
         body: JSON.stringify({ content, parent_id: parentId }),
       });
       if (res.ok) {
-        await loadTasks();
+        await loadTasks();  // Refresh to show new subtask in hierarchy
       }
     } catch (err) {
       console.error("Failed to add subtask:", err);
     }
   };
 
-  // ✅ Toggle complete / collapse
   const handleToggle = async (taskId, updates) => {
+    /**
+     * Update task properties (completion status or collapse state).
+     * Backend handles the cascade logic for completion.
+     */
     try {
       await fetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(updates),
+        body: JSON.stringify(updates),  // { completed: true } or { collapsed: true }
       });
-      await loadTasks();
+      await loadTasks();  // Refresh to show updated state
     } catch (err) {
       console.error("Failed to toggle task:", err);
     }
   };
 
-  // ✅ Delete task
   const handleDelete = async (taskId) => {
+    /**
+     * Delete a task and all its subtasks.
+     * Backend cascade delete 
+     */
     try {
       await fetch(`/api/tasks/${taskId}`, {
         method: "DELETE",
         credentials: "include",
       });
-      await loadTasks();
+      await loadTasks();  // Refresh to remove deleted task
     } catch (err) {
       console.error("Failed to delete task:", err);
     }
   };
 
-  // ✅ Edit task text
   const handleEdit = async (taskId, newContent) => {
+    /**
+     * Update a task's text content.
+     * 
+     * Called from TaskItem when user saves edited text.
+     * Sends PATCH request with new content.
+     */
     try {
       await fetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
@@ -127,14 +181,19 @@ export default function TasksPage({ listId, onBack }) {
         credentials: "include",
         body: JSON.stringify({ content: newContent }),
       });
-      await loadTasks();
+      await loadTasks();  // Refresh to show updated content
     } catch (err) {
       console.error("Failed to edit task:", err);
     }
   };
 
-  // ✅ Move top-level task to another list
   const handleMove = async (taskId, newListId) => {
+    /**
+     * Move a top-level task (and all its subtasks) to another list.
+     * 
+     * Only works for root-level tasks (subtasks stay with their parent).
+     * Backend cascade_move() updates list_id for the task and all descendants.
+     */
     try {
       const res = await fetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
@@ -143,7 +202,7 @@ export default function TasksPage({ listId, onBack }) {
         body: JSON.stringify({ list_id: newListId }),
       });
       if (res.ok) {
-        await loadTasks(); // reload tasks in current list
+        await loadTasks();  // Refresh to remove moved task
       }
     } catch (err) {
       console.error("Failed to move task:", err);
@@ -151,12 +210,19 @@ export default function TasksPage({ listId, onBack }) {
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <button onClick={onBack}>← Back to Lists</button>
+    <div className="page-container">
+      {/* Back button returns to lists overview */}
+      <button onClick={onBack} className="back-btn">
+        ← Back to Lists
+      </button>
+      
+      {/* Display current list name, or fallback to "List [id]" */}
       <h2>{listName || `List ${listId}`}</h2>
 
-      <form onSubmit={handleAddTask}>
+      {/* Form for creating new top-level tasks */}
+      <form onSubmit={handleAddTask} className="form-inline">
         <input
+          type="text"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
           placeholder="New task"
@@ -164,17 +230,19 @@ export default function TasksPage({ listId, onBack }) {
         <button type="submit">Add Task</button>
       </form>
 
+      {/* Render task list */}
+      {/* Each TaskItem renders itself and recursively renders its subtasks */}
       <ul>
         {tasks.map((task) => (
           <TaskItem
             key={task.id}
-            task={task}
-            lists={lists}
+            task={task}              // Task object with nested subtasks
+            lists={lists}            // All lists for move dropdown
             onAddSubtask={handleAddSubtask}
             onToggle={handleToggle}
             onDelete={handleDelete}
             onEdit={handleEdit}
-            onMove={handleMove} 
+            onMove={handleMove}      // Only available for top-level tasks
           />
         ))}
       </ul>
