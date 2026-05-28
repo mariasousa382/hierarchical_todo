@@ -54,37 +54,38 @@ http://localhost:5000
 
 ```
 hierarchical_todo/
-├── README.md
-├── backend/
-│   ├── app.py
-│   ├── delete_users.py
-│   ├── extensions.py
-│   ├── models.py
-│   ├── requirements.txt
-│   ├── api/
-│   │   ├── auth_routes.py
-│   │   ├── list_routes.py
-│   │   └── task_routes.py
-│   └── instance/
-│       └── todo.db
+├── README.md                 # This file
+├── backend/                  # Flask backend server
+│   ├── app.py                # Main Flask application
+│   ├── delete_users.py       # Utility script for deleting users
+│   ├── extensions.py         # Flask extensions initialization
+│   ├── models.py             # Database models
+│   ├── requirements.txt      # Python dependencies
+│   ├── api/                  # API endpoints
+│   │   ├── auth_routes.py    # Authentication routes
+│   │   ├── list_routes.py    # List management routes
+│   │   └── task_routes.py    # Task management routes
+│   └── instance/             # Local database storage
+│       └── todo.db           # SQLite database file
 └── frontend/
-    ├── package.json
-    ├── package-lock.json
+    ├── package.json          # Frontend dependencies and scripts
+    ├── package-lock.json     # Locked dependency versions
     ├── public/
+    │   └── index.html        # Main HTML template
     └── src/
-        ├── App.js
-        ├── index.js
-        ├── index.css
-        ├── components/
-        │   ├── Navbar.js
-        │   ├── Navbar.css
-        │   ├── TaskItem.js
-        │   └── TaskItem.css
-        └── pages/
-            ├── LoginPage.js
-            ├── RegisterPage.js
-            ├── ListsPage.js
-            └── TasksPage.js
+        ├── App.js            # Main React component and routing
+        ├── index.js          # React entry point
+        ├── index.css         # Global styles
+        ├── components/       # Reusable UI components
+        │   ├── Navbar.js     # Navigation bar component
+        │   ├── Navbar.css    # Navigation bar styles
+        │   ├── TaskItem.js   # Individual task component
+        │   └── TaskItem.css  # Task item styles
+        └── pages/            # Page-level components
+            ├── LoginPage.js  # Login page
+            ├── RegisterPage.js # Registration page
+            ├── ListsPage.js  # Todo lists overview
+            └── TasksPage.js  # Tasks view for a list
 ```
 
 ## Technologies Used
