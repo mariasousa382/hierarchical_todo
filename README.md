@@ -53,50 +53,38 @@ http://localhost:5000
 ## Project Structure
 
 ```
-hierarchical_todo2/
-│
-├── README.md                    # This file
-│
-├── backend/                     # Flask backend server
-│   ├── app.py                  # Main Flask application
-│   ├── extensions.py           # Flask extensions initialization
-│   ├── models.py               # Database models (User, TodoList, Task)
-│   ├── requirements.txt        # Python dependencies
-│   │
-│   ├── api/                    # API endpoints
-│   │   ├── auth_routes.py     # Authentication (login, register, logout)
-│   │   ├── list_routes.py     # List operations (CRUD)
-│   │   └── task_routes.py     # Task operations (CRUD)
-│   │
-│   └── instance/               # Database storage (auto-generated)
-│       └── todo.db            # SQLite database file
-│
-└── frontend/                   # React frontend application
-    ├── package.json           # Node.js dependencies and scripts
-    │
-    ├── build/                 # Production build (served by Flask)
-    │   ├── index.html        # Main HTML file
-    │   └── static/           # Compiled CSS and JavaScript
-    │
-    ├── public/                # Static assets
-    │   └── index.html        # HTML template
-    │
-    └── src/                   # React source code
-        ├── App.js            # Main application component and routing
-        ├── index.js          # React entry point
-        ├── index.css         # Global styles
-        │
-        ├── components/        # Reusable components
-        │   ├── Navbar.js     # Navigation bar
-        │   ├── Navbar.css    # Navbar styles
-        │   ├── TaskItem.js   # Individual task component
-        │   └── TaskItem.css  # Task styles
-        │
-        └── pages/             # Page components
-            ├── LoginPage.js   # User login
-            ├── RegisterPage.js # User registration
-            ├── ListsPage.js   # Todo lists overview
-            └── TasksPage.js   # Tasks view for a list
+hierarchical_todo/
+├── README.md
+├── backend/
+│   ├── app.py
+│   ├── delete_users.py
+│   ├── extensions.py
+│   ├── models.py
+│   ├── requirements.txt
+│   ├── api/
+│   │   ├── auth_routes.py
+│   │   ├── list_routes.py
+│   │   └── task_routes.py
+│   └── instance/
+│       └── todo.db
+└── frontend/
+    ├── package.json
+    ├── package-lock.json
+    ├── public/
+    └── src/
+        ├── App.js
+        ├── index.js
+        ├── index.css
+        ├── components/
+        │   ├── Navbar.js
+        │   ├── Navbar.css
+        │   ├── TaskItem.js
+        │   └── TaskItem.css
+        └── pages/
+            ├── LoginPage.js
+            ├── RegisterPage.js
+            ├── ListsPage.js
+            └── TasksPage.js
 ```
 
 ## Technologies Used
