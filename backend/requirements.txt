@@ -3,3 +3,4 @@ Flask-CORS==4.0.0
 Flask-Login==0.6.2
 Flask-SQLAlchemy==3.0.5
 Werkzeug==2.2.2
+gunicorn
